@@ -10,11 +10,11 @@ import {
   ListItemText,
 } from '@mui/material';
 import {
-  Home as HomeIcon,
-  Upload as UploadIcon,
-  MedicalServices as OrderIcon,
-  Logout as LogoutIcon,
-  Description as DescriptionIcon,
+  DashboardCustomizeOutlined as DashboardIcon,
+  PersonOutline as PersonIcon,
+  CreditCardOutlined as CreditCardIcon,
+  LocalOfferOutlined as LocalOfferIcon,
+  LogoutOutlined as LogoutIcon
 } from '@mui/icons-material';
 import Logo from '../../assets/logo/color-Logo.webp';
 
@@ -29,23 +29,17 @@ interface SidebarItem {
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const selectedRole = localStorage.getItem('selectedRole'); // lab | pharmacy
 
   // Role-based items
-  const labSidebarItems: SidebarItem[] = [
-    { text: 'Dashboard', icon: <HomeIcon />, route: '/dashboard' },
-    { text: 'Upload', icon: <UploadIcon />, route: '/upload' },
-    { text: 'View Report', icon: <DescriptionIcon />, route: '/view-upload' },
-  ];
-
-  const pharmacySidebarItems: SidebarItem[] = [
-    { text: 'Dashboard', icon: <HomeIcon />, route: '/pharmacy' },
-    { text: 'Orders', icon: <OrderIcon />, route: '/order' },
+  const adminSidebarItems: SidebarItem[] = [
+    { text: 'Dashboard', icon: <DashboardIcon />, route: '/dashboard' },
+    { text: 'Users', icon: <PersonIcon />, route: '/users' },
+    { text: 'Transactions', icon: <CreditCardIcon />, route: '/transactions' },
+    { text: 'Promo Codes', icon: <LocalOfferIcon />, route: '/promo-codes' },
   ];
 
   // Final items to render
-  const mainSidebarItems =
-    selectedRole === 'lab' ? labSidebarItems : pharmacySidebarItems;
+  const mainSidebarItems = adminSidebarItems;
 
   const bottomSidebarItems: SidebarItem[] = [
     { text: 'Log out', icon: <LogoutIcon />, route: '/logout' },
@@ -61,35 +55,22 @@ const Sidebar: React.FC = () => {
     navigate(route);
   };
 
-const isSelected = (route: string) => {
-  const currentPath = location.pathname;
+  const isSelected = (route: string) => {
+    const currentPath = location.pathname;
 
-  if (route === '/dashboard') {
-    return currentPath === '/dashboard';
-  } else if (route === '/upload') {
-    return (
-      currentPath === '/upload' ||
-      currentPath === '/upload/upload-report' ||
-      (currentPath.startsWith('/upload/') && !currentPath.includes('/view-report'))
-    );
-  } else if (route === '/view-upload') {
-    return (
-      currentPath === '/view-upload' || 
-      currentPath.startsWith('/view-upload/') || 
-      currentPath === '/upload/view-report'
-    );
-  } else if (route === '/pharmacy') {
-    return currentPath === '/pharmacy';
-  } else if (route === '/order') {
-    return (
-      currentPath === '/order' ||
-      currentPath.startsWith('/order/') ||
-      currentPath === '/order/order-details'
-    );
-  }
+    if (route === '/dashboard') {
+      return currentPath === '/dashboard';
+    } else if (route === '/users') {
+      return currentPath === '/users'
+    } else if (route === '/transactions') {
+      return currentPath === '/transactions';
+    } else if (route === '/promo-codes') {
+      return currentPath === '/promo-codes';
+    }
+    
 
-  return currentPath === route;
-};
+    return currentPath === route;
+  };
 
   return (
     <Drawer

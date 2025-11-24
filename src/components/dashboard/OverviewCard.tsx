@@ -1,4 +1,6 @@
+import { Typography } from '@mui/material';
 import React from 'react';
+import './overview-cards-responsive.css';
 
 export interface OverviewCardData {
   title: string;
@@ -13,13 +15,16 @@ interface OverviewCardsProps {
 
 const OverviewCards: React.FC<OverviewCardsProps> = ({ data }) => {
   return (
-    <div style={{
-      display: 'flex',
-      gap: '24px',
-      margin: '32px 0',
-      width: '100%',
-      justifyContent: 'space-between',
-    }}>
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, 1fr)',
+        gap: 24,
+        margin: '24px 0',
+        width: '100%',
+      }}
+      className="overview-cards-responsive"
+    >
       {data.map((item, idx) => (
         <div
           key={idx}
@@ -27,22 +32,20 @@ const OverviewCards: React.FC<OverviewCardsProps> = ({ data }) => {
             background: '#fff',
             borderRadius: '16px',
             boxShadow: '0 2px 8px 0 rgba(16, 30, 54, 0.04)',
-            padding: '28px 24px',
-            minWidth: 220,
+            padding: '20px',
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
             gap: 8,
             border: '1px solid #f3f3f3',
-            maxWidth: 320,
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ color: '#64748b', fontWeight: 500, fontSize: 15 }}>{item.title}</span>
+            <Typography variant="subtitle2" color="text.secondary" fontWeight={500} fontSize={15}>{item.title}</Typography>
             {item.icon && <span style={{ fontSize: 22, color: '#64748b' }}>{item.icon}</span>}
           </div>
-          <span style={{ fontSize: 32, fontWeight: 700, color: '#18181b', marginBottom: 4 }}>{item.value}</span>
-          {item.subtitle && <span style={{ fontSize: 13, color: '#94a3b8', fontWeight: 500 }}>{item.subtitle}</span>}
+          <Typography variant="h4" color="text.primary" fontWeight={700} fontSize={32} mb={0.5}>{item.value}</Typography>
+          {item.subtitle && <Typography variant="caption" color="text.secondary" fontWeight={500} fontSize={13}>{item.subtitle}</Typography>}
         </div>
       ))}
     </div>

@@ -12,9 +12,8 @@ import QuickActions from '../../components/dashboard/QuickActions';
 import { FaUsers, FaCreditCard, FaTags, FaDollarSign } from 'react-icons/fa';
 
 const Dashboard: React.FC = () => {
-  console.log('Dashboard rendered');
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#e0e0e0' }}>
+    <Box sx={{ display: 'flex', height: '100vh' }}>
       {/* Sidebar */}
       <Sidebar />
 
@@ -24,19 +23,17 @@ const Dashboard: React.FC = () => {
         display: 'flex',
         flexDirection: 'column',
         margin: 0,
-        overflow: 'hidden'
       }}>
         <TopBar />
 
         <Box sx={{
           flexGrow: 1,
-          overflow: 'auto',
-          padding: 2,
+                    padding: 2,
           paddingTop: '105px',
           bgcolor: '#e0e0e0'
         }}>
 
-          <Typography mb={2} fontWeight={'600'} fontSize={'22'}>
+          <Typography fontWeight={'600'} fontSize={'22px'}>
             Dashboard Overview
           </Typography>
 
@@ -52,7 +49,7 @@ const Dashboard: React.FC = () => {
           })()}
 
 
-          <Box sx={{display: 'flex', width: '100%', gap: 2}}>
+          <Box sx={{display: 'flex', width: '100%', gap:0.7}}>
             <RecentActivity activities={[
               { icon: null, description: 'New user regisregistration: Dr.Sarah Johson', time: '2 minutes ago', color: '#22c55e' },
               { icon: null, description: 'Transaction completed: $150 consultation', time: '5 minutes ago', color: '#3b82f6' },
