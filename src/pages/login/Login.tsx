@@ -11,7 +11,8 @@ import {
 } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
 import { useNavigate } from 'react-router';
-
+import { postLoginAdmin } from '../../redux/sagas/auth/authSagaAction';
+import { useDispatch } from 'react-redux';
 const PRIMARY_COLOR = '#00A8B9';
 
 export default function AdminLogin() {
@@ -21,6 +22,7 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleEmailChange = (e: any) => {
     setEmail(e.target.value);
@@ -53,7 +55,7 @@ export default function AdminLogin() {
     }
 
     setLoading(true);
-
+    dispatch(postLoginAdmin({ username: email, password }));
     navigate('/dashboard');
     setTimeout(() => {
       setLoading(false);

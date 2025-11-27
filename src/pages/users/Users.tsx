@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -12,51 +12,10 @@ import Sidebar from '../../components/dashboard/Sidebar';
 import TopBar from '../../components/dashboard/Topbar';
 import CustomChip from '../../components/common/CustomChip';
 import HTable from '../../components/common/HTable';
+import { useDispatch, useSelector } from 'react-redux';
+import { getUsers } from '../../redux/sagas/users/userSagaAction';
 
-const userRows = [
-  {
-    id: 1,
-    name: 'John Doe',
-    role: 'Patient',
-    registeredOn: '15/01/2024',
-    status: 'active',
-  },
-  {
-    id: 2,
-    name: 'Jane Wilson',
-    role: 'Patient',
-    registeredOn: '12/01/2024',
-    status: 'pending',
-  },
-  {
-    id: 3,
-    name: 'Mike Smith',
-    role: 'Patient',
-    registeredOn: '10/01/2024',
-    status: 'suspended',
-  },
-  {
-    id: 4,
-    name: 'Sarah Johnson',
-    role: 'Patient',
-    registeredOn: '08/01/2024',
-    status: 'suspended',
-  },
-  {
-    id: 5,
-    name: 'Tom Brown',
-    role: 'Patient',
-    registeredOn: '05/01/2024',
-    status: 'active',
-  },
-  {
-    id: 6,
-    name: 'Emma Davis',
-    role: 'Patient',
-    registeredOn: '03/01/2024',
-    status: 'pending',
-  },
-];
+
 
 const columns: any = [
   { id: 'name', label: 'Name', minWidth: 120 },
@@ -69,7 +28,7 @@ const columns: any = [
     render: (value: string) => (
       <CustomChip
         label={value}
-        color={value === 'active' ? 'success' : value === 'suspended' ? 'error' : value === 'pending' ? 'warning' : 'default'}
+        color={value === 'Active' ? 'success' : value === 'Suspended' ? 'error' : value === 'Pending' ? 'warning' : 'default'}
         variant="filled"
         size="small"
         style={{ textTransform: 'capitalize' }}
@@ -81,9 +40,9 @@ const columns: any = [
     label: 'Actions',
     minWidth: 100,
     render: (_: any, row: any) => (
-      row.status === 'active' ? (
+      row.status === 'Active' ? (
         <Button variant="contained" color="error" size="small">Suspend</Button>
-      ) : row.status === 'pending' ? (
+      ) : row.status === 'Pending' ? (
         <Button variant="contained" color="success" size="small">Approve</Button>
       ) : null
     ),
@@ -94,6 +53,21 @@ const Users: React.FC = () => {
   const [tab, setTab] = React.useState(0);
   const [search, setSearch] = React.useState('');
   const [status, setStatus] = React.useState('');
+  const dispatch = useDispatch();
+  const users = useSelector((state: any) => state.users.users);
+
+  const tabNames: Record<number, string> = {
+    0: 'patient',
+    1: 'doctor',
+    2: 'lab',
+    3: 'pharmacy',
+  };
+
+  useEffect(() => {
+    const typeName = tabNames[tab] ?? '';
+    console.debug('[Users] tab changed -> dispatch getUsers', { tab, typeName });
+    dispatch(getUsers({ type: typeName }));
+  }, [dispatch, tab]);
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
@@ -126,14 +100,13 @@ const Users: React.FC = () => {
                   { label: "All Status", value: "All Status" },
                   { label: "Active", value: "active" },
                   { label: "Suspended", value: "suspended" },
-                     { label: "Pending", value: "pending" },
+                  { label: "Pending", value: "pending" },
                 ]}
               />
             </Box>
           </Box>
 
-          {/* User Table */}
-          <HTable columns={columns} rows={userRows} defaultRowsPerPage={5} />
+          <HTable columns={columns} rows={users} defaultRowsPerPage={10} />
 
         </Box>
       </Box>
