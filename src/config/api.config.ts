@@ -16,52 +16,67 @@ const cleanBaseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : AP
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: 'admin/login',
+    PROFILE: 'admin/profile',
 
+  },
+  DASHBOARD:{
+    GET_DASHBOARD_DATA: 'admin/dashboard',
   },
   USERS:{
     GET_USERS: 'admin/users',
-  }
+    EXPORT_USERS: 'admin/export-users',
+    SUSPEND_USERS: 'subscription',
+  },
+  TRANSACTIONS:{
+    GET_TRANSACTIONS: 'admin/payment-history',
+    EXPORT: 'admin/payment-history/export-excel',
+    GET_INVOICE: 'admin/payment',
+    GET_TRANSACTION_GRAPH: 'admin/analytics/revenue',
+  },
+  PROMO_CODES:{
+    GET_PROMO_CODES: 'admin/get-all',
+    CREATE_PROMO_CODE: 'admin/create-promo',
+    GET_PROMO_CODE_BY_ID: 'admin/promo',
+    DELETE_PROMO_CODE: 'admin/delete',
+    UPDATE_PROMO_CODE: 'admin/update',
+  },
 };
-export const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
+export const apiRequest = async (endpoint: string, options: any = {}) => {
   const requestId = Math.random().toString(36).substring(2, 6);
 
-  const cleanEndpoint = endpoint.replace(/^\/+/, '');
+  const cleanEndpoint = endpoint.replace(/^\/+/, "");
+  const url = API_BASE_URL
+    ? `${cleanBaseUrl}/${cleanEndpoint}`
+    : `/api/${cleanEndpoint}`;
 
-  const url = API_BASE_URL ? `${cleanBaseUrl}/${cleanEndpoint}` : `/api/${cleanEndpoint}`;
-  const headers = new Headers(options.headers);
-  if (!headers.has('Content-Type') && (options.method === 'POST' || options.method === 'PUT')) {
-    headers.set('Content-Type', 'application/json');
-  }
-
-  if (options.body) {
-    try {
-      const bodyObj = typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
-    } catch (e) {
-      console.error(`🌐 [${requestId}] Request Body (raw):`, options.body);
-    }
-  }
+  const isBinary = options.isBinary === true; // 🔥 detect binary mode
 
   const config: RequestInit = {
+    method: options.method || "GET",
     headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
       ...options.headers,
     },
-    credentials: 'include',
-    mode: 'cors',
-    ...options,
+    body: options.body,
+    credentials: "include",
+    mode: "cors",
   };
 
   try {
     const response = await fetch(url, config);
 
+    if (isBinary) {
+      if (!response.ok) {
+        throw new Error("File download failed");
+      }
+      return await response.blob(); // <-- Return Blob instead of JSON
+    }
     const responseText = await response.text();
-    const responseHeaders = Object.fromEntries(response.headers.entries());
 
     let responseData;
+
     try {
       responseData = responseText ? JSON.parse(responseText) : null;
-    } catch (e) {
+    } catch {
       console.error(`🌐 [${requestId}] Response Body (raw):`, responseText);
       responseData = responseText;
     }
@@ -74,29 +89,21 @@ export const apiRequest = async (endpoint: string, options: RequestInit = {}) =>
         response: responseData || responseText,
       });
 
-      // Extract error message from the parsed response data
-      let errorMessage = 'An error occurred';
-      
-      if (responseData?.error) {
-        errorMessage = responseData.error;
-      } else if (responseData?.message) {
-        errorMessage = responseData.message;
-      } else if (responseData?.errors) {
-        // Handle validation errors array
-        errorMessage = Array.isArray(responseData.errors) 
-          ? responseData.errors.map((e: any) => e.message || e).join(', ')
-          : responseData.errors;
-      } else if (response.statusText) {
-        errorMessage = response.statusText;
-      }
+      let errorMessage = "An error occurred";
 
-      // Create error object with the message
+      if (responseData?.error) errorMessage = responseData.error;
+      else if (responseData?.message) errorMessage = responseData.message;
+      else if (responseData?.errors) {
+        errorMessage = Array.isArray(responseData.errors)
+          ? responseData.errors
+              .map((e: any) => e.message || e)
+              .join(", ")
+          : responseData.errors;
+      } else if (response.statusText) errorMessage = response.statusText;
+
       const error: any = new Error(errorMessage);
       error.status = response.status;
-      error.statusText = response.statusText;
       error.data = responseData;
-      error.response = responseData;
-      
       throw error;
     }
 
@@ -106,12 +113,14 @@ export const apiRequest = async (endpoint: string, options: RequestInit = {}) =>
       throw error;
     }
 
-    // For network errors or other issues
-    console.error('API request failed:', error);
-    const networkError: any = new Error(error.message || 'Network error occurred');
+    console.error("API request failed:", error);
+    const networkError: any = new Error(
+      error.message || "Network error occurred"
+    );
     networkError.original = error;
     throw networkError;
   }
 };
+
 
 export default API_ENDPOINTS;

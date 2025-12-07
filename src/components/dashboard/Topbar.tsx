@@ -30,7 +30,7 @@ const TopBar: React.FC<TopBarProps> = ({
   
 
   const handleProfileClick = () => {
-    navigate('/full-profile');
+    navigate('/profile');
   };
 
   return (

@@ -3,12 +3,20 @@ import { spawn } from 'redux-saga/effects';
 
 import AuthSaga from './auth/authSaga';
 import UsersSaga from './users/userSaga';
+import transactionsSaga from './transactions/transactionsSaga';
+import promoCodesSaga from './promoCodes/promoCodesSaga';
+import dashboardSaga from './dashboard/dashboardSaga';
+import profileSaga from './profile/profileSaga';
 
 // Export default function rootSaga
 export default function* rootSaga() {
   // Spawn all sagas here
   yield spawn(AuthSaga);
   yield spawn(UsersSaga);
+  yield spawn(transactionsSaga);
+  yield spawn(promoCodesSaga);
+  yield spawn(dashboardSaga);
+  yield spawn(profileSaga);
 
 }
 
@@ -24,11 +32,21 @@ export enum SagaActions {
   SET = 'SET',
   CLEAR = 'CLEAR',
   FAIL = 'FAIL',
+  EXPORT = 'EXPORT',
   
   // Entity names
   AUTH = 'AUTH',
   LOGIN_ADMIN = 'LOGIN_ADMIN',
   USERS = 'USERS',
+  TRANSACTIONS = 'TRANSACTIONS',
+  PROMO_CODES = 'PROMO_CODES',
+  PROMO_CODE = 'PROMO_CODE',
+  DASHBOARD = 'DASHBOARD',  
+  INVOICE = 'INVOICE',
+  EXPORT_USERS = 'EXPORT_USERS',
+  SUSPEND_USERS = 'SUSPEND_USERS',
+  PROFILE = 'PROFILE',
+  TRANSACTIONS_GRAPH = 'TRANSACTIONS_GRAPH',
 }
 
 // Export enum SagaActionType

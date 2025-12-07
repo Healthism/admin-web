@@ -5,6 +5,8 @@ export interface AuthState {
   phoneNumber: string ;
   otpSent: boolean;
   token: string | null;
+  username?: string;
+  loginStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
   verify: {
     isProfileComplete: boolean;
     userType?: string;
@@ -22,6 +24,8 @@ const initialState: AuthState = {
   phoneNumber: '',
   otpSent: false,
   token: localStorage.getItem('token') ,
+  username: undefined,
+  loginStatus: 'idle',
   verify: {
     isProfileComplete: false,
   },
@@ -41,73 +45,41 @@ export const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Send OTP Request
-     builder.addMatcher(
-      (action) => action.type === `${SagaActions.SEND_OTP}_${SagaActionType.REQUEST}`,
-      (state, action: any) => {
-  
-        
-        state.status.sendOtp = 'loading';
-        state.error = null;
-      }
-    );
-    // Send OTP Success
+    // Login Admin Request
     builder.addMatcher(
-      (action) => action.type === `${SagaActions.SEND_OTP}_${SagaActionType.SUCCESS}`,
-      (state, action: any) => {
-        state.status.sendOtp = 'succeeded';
-        state.otpSent = true;
-        state.phoneNumber = action.payload.phoneNumber;
-        state.error = null;
-      }
-    );
-
-    // Send OTP Fail
-    builder.addMatcher(
-      (action) => action.type === `${SagaActions.SEND}_${SagaActions.SEND_OTP}_${SagaActionType.FAIL}`,
-      (state, action: any) => {
-        state.status.sendOtp = 'failed';
-        state.error = action.payload;
-        state.otpSent = false;
-      }
-    );
-
-    // Verify OTP Request
-    builder.addMatcher(
-      (action) => action.type === `${SagaActions.SEND}_${SagaActions.VERIFY_OTP}_${SagaActionType.REQUEST}`,
+      (action) => action.type === `${SagaActions.LOGIN_ADMIN}_${SagaActionType.REQUEST}`,
       (state) => {
-        state.status.verifyOtp = 'loading';
+        state.loginStatus = 'loading';
         state.error = null;
       }
     );
 
-    // Verify OTP Success
+    // Login Admin Success
     builder.addMatcher(
-      (action) => action.type === `${SagaActions.VERIFY_OTP}_${SagaActionType.SUCCESS}`,
+      (action) => action.type === `${SagaActions.LOGIN_ADMIN}_${SagaActionType.SUCCESS}`,
       (state, action: any) => {
-        state.status.verifyOtp = 'succeeded';
-        state.token = action.payload.token;
-        state.verify = {
-          ...action.payload,
-          isProfileComplete: action.payload.isProfileComplete,
-          userType: action.payload.userType,
-          userId: action.payload.userId,
-        };
-        localStorage.setItem('token', action.payload.token);
+        state.loginStatus = 'succeeded';
+        state.token = action.payload?.token || 'authenticated';
+        state.username = action.payload?.username;
         state.error = null;
+        if (action.payload?.token) {
+          localStorage.setItem('token', action.payload.token);
+        }
       }
     );
 
-    // Verify OTP Fail
+    // Login Admin Fail
     builder.addMatcher(
-      (action) => action.type === `${SagaActions.VERIFY_OTP}_${SagaActionType.FAIL}`,
+      (action) => action.type === `${SagaActions.LOGIN_ADMIN}_${SagaActionType.FAIL}`,
       (state, action: any) => {
-        state.status.verifyOtp = 'failed';
+        state.loginStatus = 'failed';
         state.error = action.payload;
         state.token = null;
         localStorage.removeItem('token');
       }
     );
+
+    
   },
 });
 

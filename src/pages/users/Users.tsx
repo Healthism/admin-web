@@ -13,41 +13,62 @@ import TopBar from '../../components/dashboard/Topbar';
 import CustomChip from '../../components/common/CustomChip';
 import HTable from '../../components/common/HTable';
 import { useDispatch, useSelector } from 'react-redux';
-import { getUsers } from '../../redux/sagas/users/userSagaAction';
+import { getExportUsers, getUsers, suspendUsers } from '../../redux/sagas/users/userSagaAction';
+import { getExport } from '../../redux/sagas/transactions/transactionsSagaAction';
+
+const getColumns = (users: any, handleSuspend: (userId: string) => void) => {
+  const baseColumns: any = [
+    { id: 'name', label: 'Name', minWidth: 120 },
+    { id: 'role', label: 'Role', minWidth: 80 },
+    { id: 'registeredOn', label: 'Registered On', minWidth: 100 },
+    {
+      id: 'status',
+      label: 'Status',
+      minWidth: 80,
+      render: (value: string) => (
+        <CustomChip
+          label={value}
+          color={value === 'Active' ? 'success' : value === 'Suspended' ? 'error' : value === 'Inactive' ? 'warning' : 'default'}
+          variant="filled"
+          size="small"
+          style={{ textTransform: 'capitalize' }}
+        />
+      ),
+    },
+  ];
 
 
+  // Only add actions column if there are non-Patient/Doctor users
+  const hasActionableUsers = users.some((row: any) => row.role !== 'Patient' && row.role !== 'Doctor');
 
-const columns: any = [
-  { id: 'name', label: 'Name', minWidth: 120 },
-  { id: 'role', label: 'Role', minWidth: 80 },
-  { id: 'registeredOn', label: 'Registered On', minWidth: 100 },
-  {
-    id: 'status',
-    label: 'Status',
-    minWidth: 80,
-    render: (value: string) => (
-      <CustomChip
-        label={value}
-        color={value === 'Active' ? 'success' : value === 'Suspended' ? 'error' : value === 'Pending' ? 'warning' : 'default'}
-        variant="filled"
-        size="small"
-        style={{ textTransform: 'capitalize' }}
-      />
-    ),
-  },
-  {
-    id: 'actions',
-    label: 'Actions',
-    minWidth: 100,
-    render: (_: any, row: any) => (
-      row.status === 'Active' ? (
-        <Button variant="contained" color="error" size="small">Suspend</Button>
-      ) : row.status === 'Pending' ? (
-        <Button variant="contained" color="success" size="small">Approve</Button>
-      ) : null
-    ),
-  },
-];
+  if (hasActionableUsers) {
+    baseColumns.push({
+      id: 'actions',
+      label: 'Actions',
+      minWidth: 100,
+      render: (_: any, row: any) => {
+        if (row.role === 'Patient' || row.role === 'Doctor') {
+          return null;
+        }
+
+        return row.status === 'Active' ? (
+          <Button
+            variant="contained"
+            color="error"
+            size="small"
+            onClick={() => handleSuspend(row._id)}
+          >
+            Suspend
+          </Button>
+        ) : row.status === 'Inactive' ? (
+          ""
+        ) : null;
+      },
+    });
+  }
+
+  return baseColumns;
+};
 
 const Users: React.FC = () => {
   const [tab, setTab] = React.useState(0);
@@ -63,11 +84,34 @@ const Users: React.FC = () => {
     3: 'pharmacy',
   };
 
+  const handleSuspend = (userId: string) => {
+    dispatch(suspendUsers({ userId }));
+  };
+
+
   useEffect(() => {
     const typeName = tabNames[tab] ?? '';
-    console.debug('[Users] tab changed -> dispatch getUsers', { tab, typeName });
-    dispatch(getUsers({ type: typeName }));
-  }, [dispatch, tab]);
+
+    // Build payload object with type and optional search/status
+    const payload: any = { type: typeName };
+
+    // Add search if it's not empty
+    if (search.trim()) {
+      payload.search = search.trim();
+    }
+
+    // Add status if it's selected and not "All Status"
+    if (status && status !== 'All Status') {
+      payload.status = status;
+    }
+
+    dispatch(getUsers(payload));
+  }, [dispatch, tab, search, status]);
+
+  const handleExport = () => {
+    dispatch(getExportUsers({ type: tabNames[tab] ?? '' }));
+  }
+
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
@@ -84,7 +128,10 @@ const Users: React.FC = () => {
               <Tab label="Labs" sx={{ minHeight: 36, fontWeight: 600 }} />
               <Tab label="Pharmacies" sx={{ minHeight: 36, fontWeight: 600 }} />
             </Tabs>
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <Box>
+                <Button variant='contained' color="primary" onClick={handleExport} >Export</Button>
+              </Box>
               <InputBase
                 placeholder="Search users..."
                 value={search}
@@ -106,7 +153,7 @@ const Users: React.FC = () => {
             </Box>
           </Box>
 
-          <HTable columns={columns} rows={users} defaultRowsPerPage={10} />
+          <HTable columns={getColumns(users,handleSuspend)} rows={users} defaultRowsPerPage={10} />
 
         </Box>
       </Box>

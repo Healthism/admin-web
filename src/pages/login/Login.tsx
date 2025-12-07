@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Paper,
@@ -12,7 +12,7 @@ import {
 import LockIcon from '@mui/icons-material/Lock';
 import { useNavigate } from 'react-router';
 import { postLoginAdmin } from '../../redux/sagas/auth/authSagaAction';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 const PRIMARY_COLOR = '#00A8B9';
 
 export default function AdminLogin() {
@@ -23,6 +23,26 @@ export default function AdminLogin() {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const authError = useSelector((state: any) => state.auth?.error);
+  const token = useSelector((state: any) => state.auth?.token);
+
+  useEffect(() => {
+    if (token && loading) {
+      setLoading(false);
+      setEmail('');
+      setPassword('');
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 100);
+    }
+  }, [token, loading, email, navigate]);
+
+  useEffect(() => {
+    if (authError && loading) {
+      setLoading(false);
+      setError(authError);
+    }
+  }, [authError, loading]);
 
   const handleEmailChange = (e: any) => {
     setEmail(e.target.value);
@@ -56,13 +76,6 @@ export default function AdminLogin() {
 
     setLoading(true);
     dispatch(postLoginAdmin({ username: email, password }));
-    navigate('/dashboard');
-    setTimeout(() => {
-      setLoading(false);
-      setSuccess(`Welcome back! Logged in as ${email}`);
-      setEmail('');
-      setPassword('');
-    }, 1500);
   };
 
   return (

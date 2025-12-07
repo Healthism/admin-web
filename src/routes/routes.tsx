@@ -4,6 +4,7 @@ import Users from '../pages/users/Users';
 import Transactions from '../pages/transactions/Transactions';
 import PromoCodes from '../pages/promo-codes/PromoCodes';
 import Login from '../pages/login/Login';
+import FullProfile from '../pages/fullProfile/FullProfile';
 
 export interface AppRoute {
   path: string;
@@ -33,5 +34,9 @@ export const routes: AppRoute[] = [
   {
     path: '/promo-codes',
     element: <PromoCodes />,
+  },  {
+    path: '/profile',
+    element: <FullProfile />,
   },
+
 ];
