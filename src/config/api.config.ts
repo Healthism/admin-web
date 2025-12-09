@@ -57,8 +57,8 @@ export const apiRequest = async (endpoint: string, options: any = {}) => {
       ...options.headers,
     },
     body: options.body,
-    credentials: "include",
-    mode: "cors",
+    credentials: isProduction ? "omit" : "include",
+    mode: isProduction ? "cors" : "cors",
   };
 
   try {
