@@ -1,0 +1,15 @@
+@media (min-width: 900px) {
+  .overview-cards-responsive {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+@media (max-width: 899px) {
+  .overview-cards-responsive {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+@media (max-width: 599px) {
+  .overview-cards-responsive {
+    grid-template-columns: 1fr !important;
+  }
+}
