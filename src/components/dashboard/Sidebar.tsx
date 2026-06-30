@@ -14,6 +14,7 @@ import {
   PersonOutline as PersonIcon,
   CreditCardOutlined as CreditCardIcon,
   LocalOfferOutlined as LocalOfferIcon,
+  RateReviewOutlined as FeedbackIcon,
   LogoutOutlined as LogoutIcon
 } from '@mui/icons-material';
 import Logo from '../../assets/logo/color-Logo.webp';
@@ -33,6 +34,7 @@ const Sidebar: React.FC = () => {
   // Role-based items
   const adminSidebarItems: SidebarItem[] = [
     { text: 'Dashboard', icon: <DashboardIcon />, route: '/dashboard' },
+    { text: 'Feedback & Waitlist', icon: <FeedbackIcon />, route: '/feedback' },
     { text: 'Users', icon: <PersonIcon />, route: '/users' },
     { text: 'Transactions', icon: <CreditCardIcon />, route: '/transactions' },
     { text: 'Promo Codes', icon: <LocalOfferIcon />, route: '/promo-codes' },
@@ -66,6 +68,8 @@ const Sidebar: React.FC = () => {
       return currentPath === '/transactions';
     } else if (route === '/promo-codes') {
       return currentPath === '/promo-codes';
+    } else if (route === '/feedback') {
+      return currentPath === '/feedback';
     }
     
 

@@ -12,11 +12,12 @@ import Sidebar from '../../components/dashboard/Sidebar';
 import TopBar from '../../components/dashboard/Topbar';
 import CustomChip from '../../components/common/CustomChip';
 import HTable from '../../components/common/HTable';
+import SuspendAccountModal from '../../components/common/SuspendAccountModal';
+import RestoreAccountModal from '../../components/common/RestoreAccountModal';
 import { useDispatch, useSelector } from 'react-redux';
-import { getExportUsers, getUsers, suspendUsers } from '../../redux/sagas/users/userSagaAction';
-import { getExport } from '../../redux/sagas/transactions/transactionsSagaAction';
+import { getExportUsers, getUsers, toggleUserStatus } from '../../redux/sagas/users/userSagaAction';
 
-const getColumns = (users: any, handleSuspend: (userId: string) => void) => {
+const getColumns = (users: any, onSuspendClick: (row: any) => void, onUnsuspendClick: (row: any) => void) => {
   const baseColumns: any = [
     { id: 'name', label: 'Name', minWidth: 120 },
     { id: 'role', label: 'Role', minWidth: 80 },
@@ -37,8 +38,6 @@ const getColumns = (users: any, handleSuspend: (userId: string) => void) => {
     },
   ];
 
-
-  // Only add actions column if there are non-Patient/Doctor users
   const hasActionableUsers = users.some((row: any) => row.role !== 'Patient' && row.role !== 'Doctor');
 
   if (hasActionableUsers) {
@@ -51,18 +50,33 @@ const getColumns = (users: any, handleSuspend: (userId: string) => void) => {
           return null;
         }
 
-        return row.status === 'Active' ? (
-          <Button
-            variant="contained"
-            color="error"
-            size="small"
-            onClick={() => handleSuspend(row._id)}
-          >
-            Suspend
-          </Button>
-        ) : row.status === 'Inactive' ? (
-          ""
-        ) : null;
+        if (row.status === 'Active') {
+          return (
+            <Button
+              variant="contained"
+              color="error"
+              size="small"
+              onClick={() => onSuspendClick(row)}
+            >
+              Suspend
+            </Button>
+          );
+        }
+
+        if (row.status === 'Suspended') {
+          return (
+            <Button
+              variant="contained"
+              color="success"
+              size="small"
+              onClick={() => onUnsuspendClick(row)}
+            >
+              Unsuspend
+            </Button>
+          );
+        }
+
+        return null;
       },
     });
   }
@@ -84,8 +98,54 @@ const Users: React.FC = () => {
     3: 'pharmacy',
   };
 
-  const handleSuspend = (userId: string) => {
-    dispatch(suspendUsers({ userId }));
+  const [suspendModalOpen, setSuspendModalOpen] = React.useState(false);
+  const [restoreModalOpen, setRestoreModalOpen] = React.useState(false);
+  const [selectedUser, setSelectedUser] = React.useState<any>(null);
+
+  const DURATION_DAYS_MAP: Record<string, number> = {
+    '7_days': 7,
+    '14_days': 14,
+    '30_days': 30,
+    '60_days': 60,
+    '90_days': 90,
+    'permanent': 0,
+  };
+
+  const handleSuspendClick = (row: any) => {
+    setSelectedUser(row);
+    setSuspendModalOpen(true);
+  };
+
+  const handleUnsuspendClick = (row: any) => {
+    setSelectedUser(row);
+    setRestoreModalOpen(true);
+  };
+
+  const handleSuspendConfirm = (data: { reasons: string[]; duration: string }) => {
+    if (selectedUser) {
+      dispatch(toggleUserStatus({
+        userId: selectedUser._id,
+        type: selectedUser.role,
+        action: 'suspend',
+        reason: data.reasons.join(', '),
+        duration_days: DURATION_DAYS_MAP[data.duration] ?? 30,
+      }));
+    }
+    setSuspendModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleRestoreConfirm = (data: { reasons: string[]; duration: string }) => {
+    if (selectedUser) {
+      dispatch(toggleUserStatus({
+        userId: selectedUser._id,
+        type: selectedUser.role,
+        action: 'activate',
+        reason: data.reasons.length > 0 ? data.reasons.join(', ') : 'Issue Resolved',
+      }));
+    }
+    setRestoreModalOpen(false);
+    setSelectedUser(null);
   };
 
 
@@ -147,13 +207,38 @@ const Users: React.FC = () => {
                   { label: "All Status", value: "All Status" },
                   { label: "Active", value: "active" },
                   { label: "Suspended", value: "suspended" },
-                  { label: "Pending", value: "pending" },
+                  { label: "Inactive", value: "inactive" },
                 ]}
               />
             </Box>
           </Box>
 
-          <HTable columns={getColumns(users,handleSuspend)} rows={users} defaultRowsPerPage={10} />
+          <HTable columns={getColumns(users, handleSuspendClick, handleUnsuspendClick)} rows={users} defaultRowsPerPage={10} />
+
+          <SuspendAccountModal
+            open={suspendModalOpen}
+            onClose={() => { setSuspendModalOpen(false); setSelectedUser(null); }}
+            onConfirm={handleSuspendConfirm}
+            user={selectedUser ? {
+              name: selectedUser.name,
+              role: selectedUser.role,
+              registeredOn: selectedUser.registeredOn,
+              subscription: selectedUser.subscription,
+              activeOrders: selectedUser.activeOrders,
+              pendingOrders: selectedUser.pendingOrders,
+            } : null}
+          />
+
+          <RestoreAccountModal
+            open={restoreModalOpen}
+            onClose={() => { setRestoreModalOpen(false); setSelectedUser(null); }}
+            onConfirm={handleRestoreConfirm}
+            user={selectedUser ? {
+              name: selectedUser.name,
+              role: selectedUser.role,
+              suspension: selectedUser.suspension || null,
+            } : null}
+          />
 
         </Box>
       </Box>

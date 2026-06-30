@@ -7,6 +7,7 @@ import transactionsSaga from './transactions/transactionsSaga';
 import promoCodesSaga from './promoCodes/promoCodesSaga';
 import dashboardSaga from './dashboard/dashboardSaga';
 import profileSaga from './profile/profileSaga';
+import feedbackSaga from './feedback/feedbackSaga';
 
 // Export default function rootSaga
 export default function* rootSaga() {
@@ -17,7 +18,7 @@ export default function* rootSaga() {
   yield spawn(promoCodesSaga);
   yield spawn(dashboardSaga);
   yield spawn(profileSaga);
-
+  yield spawn(feedbackSaga);
 }
 
 // Export enum SagaActions
@@ -45,8 +46,13 @@ export enum SagaActions {
   INVOICE = 'INVOICE',
   EXPORT_USERS = 'EXPORT_USERS',
   SUSPEND_USERS = 'SUSPEND_USERS',
+  TOGGLE_USER_STATUS = 'TOGGLE_USER_STATUS',
   PROFILE = 'PROFILE',
   TRANSACTIONS_GRAPH = 'TRANSACTIONS_GRAPH',
+  FEEDBACK = 'FEEDBACK',
+  WAITLIST = 'WAITLIST',
+  EXPORT_FEEDBACK = 'EXPORT_FEEDBACK',
+  EXPORT_WAITLIST = 'EXPORT_WAITLIST',
 }
 
 // Export enum SagaActionType

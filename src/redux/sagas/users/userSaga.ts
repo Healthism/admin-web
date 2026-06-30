@@ -3,12 +3,11 @@ import {
   call,
   spawn,
   takeEvery,
-  all,
   type CallEffect,
   type PutEffect,
 } from "redux-saga/effects";
 import { SagaActionType, SagaActions } from "../index";
-import type { getUsersPayload, suspendUsersPayload } from "./userSagaAction";
+import type { getUsersPayload, toggleUserStatusPayload } from "./userSagaAction";
 import type { AnyAction } from "redux-saga";
 import API_ENDPOINTS, { apiRequest } from "../../../config/api.config";
 import { showNotification } from "../../../redux/slices/notificationSlice";
@@ -123,33 +122,28 @@ export function* fetchExportUsers({
 }
 
 
-export function* suspendUsers({
+export function* toggleUserStatus({
   payload,
-}: suspendUsersPayload): Generator<
+}: toggleUserStatusPayload): Generator<
   CallEffect<any> | PutEffect<AnyAction>,
   void,
   any
 > {
-  // const token = getAuthToken();
-
   yield put({
-    type: `${SagaActions.CLEAR}_${SagaActions.SUSPEND_USERS}`,
+    type: `${SagaActions.CLEAR}_${SagaActions.TOGGLE_USER_STATUS}`,
   });
 
   try {
-    const endpoint = API_ENDPOINTS.USERS.SUSPEND_USERS;
-    const endpointWithQuery = payload?.userId
-      ? `${endpoint}/${encodeURIComponent(payload.userId)}`
-      : endpoint;
+    const endpoint = API_ENDPOINTS.USERS.TOGGLE_STATUS;
 
-    const response = yield call(apiRequest, endpointWithQuery, {
-      method: "DELETE",
+    const response = yield call(apiRequest, endpoint, {
+      method: "PATCH",
       headers: {
-        // 'Authorization': `Bearer ${token}`,
         "Content-Type": "application/json",
         Accept: "application/json",
       },
       credentials: "include",
+      body: JSON.stringify(payload),
     });
 
     if (!response) {
@@ -157,24 +151,19 @@ export function* suspendUsers({
     }
 
     yield put({
-      type: `${SagaActions.DELETE}_${SagaActions.SUSPEND_USERS}_${SagaActionType.SUCCESS}`,
+      type: `${SagaActions.PATCH}_${SagaActions.TOGGLE_USER_STATUS}_${SagaActionType.SUCCESS}`,
       payload: response,
     });
 
-    yield put(showNotification({ message: response.message || response.msg, severity: 'success' }));
-    
-  } catch (error: any) {
-    console.error("❌ Users suspend failed:", error);
+    yield put(showNotification({ message: response.message || 'Status updated successfully', severity: 'success' }));
 
+  } catch (error: any) {
     yield put({
-      type: `${SagaActions.DELETE}_${SagaActions.SUSPEND_USERS}_${SagaActionType.FAIL}`,
-      payload: error?.message || "Failed to suspend users data",
+      type: `${SagaActions.PATCH}_${SagaActions.TOGGLE_USER_STATUS}_${SagaActionType.FAIL}`,
+      payload: error?.message || "Failed to update user status",
     });
 
-    console.error(
-      "🔴 Dispatched FETCH_FAIL action with error:",
-      error?.message
-    );
+    yield put(showNotification({ message: error?.message || 'Failed to update user status', severity: 'error' }));
   }
 }
 // Watcher functions
@@ -193,16 +182,15 @@ function* exportUsersWatcher() {
   );
 }
 
-function* suspendUsersWatcher() {
+function* toggleUserStatusWatcher() {
   yield takeEvery(
-    `${SagaActions.DELETE}_${SagaActions.SUSPEND_USERS}_${SagaActionType.REQUEST}`,
-    suspendUsers
+    `${SagaActions.PATCH}_${SagaActions.TOGGLE_USER_STATUS}_${SagaActionType.REQUEST}`,
+    toggleUserStatus
   );
 }
 
-// Root auth saga
 export default function* rootUsersSaga() {
   yield spawn(usersWatcher);
   yield spawn(exportUsersWatcher);
-  yield spawn(suspendUsersWatcher);
+  yield spawn(toggleUserStatusWatcher);
 }

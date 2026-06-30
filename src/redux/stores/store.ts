@@ -10,6 +10,7 @@ import notificationReducer from '../slices/notificationSlice';
 import notificationMiddleware from '../middleware/notificationMiddleware';
 import dashboardReducer from '../slices/dahboardSlice';
 import profileReducer from '../slices/profileSlice';
+import feedbackReducer from '../slices/feedbackSlice';
 
 // Create and configure store
 const sagaMiddleware = createSagaMiddleware();
@@ -23,6 +24,7 @@ const store = configureStore({
     notification: notificationReducer,
     dashboard: dashboardReducer,
     profile: profileReducer,
+    feedback: feedbackReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

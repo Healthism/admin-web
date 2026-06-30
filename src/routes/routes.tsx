@@ -5,6 +5,7 @@ import Transactions from '../pages/transactions/Transactions';
 import PromoCodes from '../pages/promo-codes/PromoCodes';
 import Login from '../pages/login/Login';
 import FullProfile from '../pages/fullProfile/FullProfile';
+import FeedbackAndWaitlist from '../pages/feedback/FeedbackAndWaitlist';
 import ProtectedRoute from './ProtectedRoute'
 
 export interface AppRoute {
@@ -31,6 +32,10 @@ export const routes: AppRoute[] = [
   {
     path: '/promo-codes',
     element: <ProtectedRoute><PromoCodes /></ProtectedRoute>,
+  },
+  {
+    path: '/feedback',
+    element: <ProtectedRoute><FeedbackAndWaitlist /></ProtectedRoute>,
   }, {
     path: '/profile',
     element: <ProtectedRoute><FullProfile /></ProtectedRoute>,

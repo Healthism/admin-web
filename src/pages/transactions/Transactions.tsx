@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -22,15 +22,11 @@ const Transactions: React.FC = () => {
   const [startDate, setStartDate] = React.useState('');
   const [endDate, setEndDate] = React.useState('');
   const [type, setType] = React.useState('');
-  const [status, setStatus] = React.useState('');
   const [payment, setPayment] = React.useState('');
   const [openModal, setOpenModal] = React.useState(false);
   const [search, setSearch] = React.useState('');
   const dispatch = useDispatch();
   const { transactions, invoice } = useSelector((state: any) => state.transactions);
-
-  // Use ref to track if initial load has happened
-  const initialLoadDone = useRef(false);
 
   const handleView = (row: any) => {
     dispatch(getInvoice({ orderId: row.appointment_id }));
@@ -43,7 +39,7 @@ const Transactions: React.FC = () => {
 
   // Define columns inside component so it can access handleView
   const columns: any = [
-    { id: 'appointment_id', label: 'Appointment ID', minWidth: 110 },
+    { id: 'appointment_id', label: 'Transaction ID', minWidth: 110 },
     { id: 'date', label: 'Date', minWidth: 90 },
     { id: 'type', label: 'Type', minWidth: 110 },
     { id: 'patient', label: 'Patient', minWidth: 110 },
@@ -89,8 +85,7 @@ const Transactions: React.FC = () => {
     },
   ];
 
-  // Function to fetch transactions with filters
-  const fetchTransactionsWithFilters = () => {
+  useEffect(() => {
     const filters: any = {};
 
     if (startDate) filters.date_from = startDate;
@@ -101,22 +96,7 @@ const Transactions: React.FC = () => {
       filters.search = search.trim();
     }
     dispatch(getTransactions(filters));
-  };
-
-  // Initial load - only once on mount
-  useEffect(() => {
-    if (!initialLoadDone.current) {
-      fetchTransactionsWithFilters();
-      initialLoadDone.current = true;
-    }
-  }, []);
-
-  // Fetch when filters change - but skip on initial mount
-  useEffect(() => {
-    if (initialLoadDone.current) {
-      fetchTransactionsWithFilters();
-    }
-  }, [startDate, endDate, type, status, payment, search]);
+  }, [dispatch, startDate, endDate, type, payment, search]);
 
   const handleExport = () => {
     dispatch(getExport());
@@ -210,9 +190,10 @@ const Transactions: React.FC = () => {
                 width={135}
                 options={[
                   { label: "All Types", value: "All Types" },
-                  { label: "Consultation", value: "consultation" },
+                  // { label: "Consultation", value: "consultation" },
                   { label: "Subscription", value: "subscription" },
                   { label: "Order", value: "order" },
+                  { label: "Broadcast", value: "broadcast" },
                 ]}
               />
 
@@ -224,7 +205,7 @@ const Transactions: React.FC = () => {
                 options={[
                   { label: "All Payments", value: "All Payments" },
                   { label: "Paid", value: "Paid" },
-                  { label: "Pending", value: "Pending" },
+                  // { label: "Pending", value: "Pending" },
                   { label: "Refunded", value: "refunded" },
                 ]}
               />
@@ -287,7 +268,7 @@ const Transactions: React.FC = () => {
           {invoice && (
             <Box sx={{ pt: 2, px: 3, pb: 2 }}>
               {/* Invoice ID and Date */}
-              <Grid container spacing={2} >
+              <Grid container spacing={2}>
                 <Grid size={{ xs: 6 }}>
                   <Typography variant="body2" color="text.secondary">Invoice ID</Typography>
                   <Typography variant="body1" fontWeight={500}>{invoice.invoice_id}</Typography>
@@ -300,106 +281,256 @@ const Transactions: React.FC = () => {
 
               <Divider sx={{ my: 2 }} />
 
-              <Box >
-                <Typography fontWeight={600} >Billing To</Typography>
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography variant="body2" color="text.secondary">User ID</Typography>
-                    <Typography variant="body1">{invoice.billing_to?.user_id}</Typography>
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography variant="body2" color="text.secondary">User Type</Typography>
-                    <Typography variant="body1">{invoice.billing_to?.user_type}</Typography>
-                  </Grid>
-                </Grid>
-              </Box>
+              {/* Order Details (pharmacy/lab orders, broadcast) */}
+              {invoice.order_details && (
+                <>
+                  <Box>
+                    <Typography fontWeight={600}>Order Details</Typography>
+                    <Grid container spacing={2}>
+                      {invoice.order_details.patient_name && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Patient</Typography>
+                          <Typography variant="body1">{invoice.order_details.patient_name}</Typography>
+                        </Grid>
+                      )}
+                      {invoice.order_details.health_id && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Health ID</Typography>
+                          <Typography variant="body1">{invoice.order_details.health_id}</Typography>
+                        </Grid>
+                      )}
+                      {invoice.order_details.doctor_name && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Doctor</Typography>
+                          <Typography variant="body1">{invoice.order_details.doctor_name}</Typography>
+                        </Grid>
+                      )}
+                      {invoice.order_details.pharmacy_name && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Pharmacy</Typography>
+                          <Typography variant="body1">{invoice.order_details.pharmacy_name}</Typography>
+                        </Grid>
+                      )}
+                      {invoice.order_details.lab_name && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Lab</Typography>
+                          <Typography variant="body1">{invoice.order_details.lab_name}</Typography>
+                        </Grid>
+                      )}
+                      {invoice.order_details.status && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Status</Typography>
+                          <CustomChip
+                            label={invoice.order_details.status}
+                            color={invoice.order_details.status === 'delivered' ? 'success' : invoice.order_details.status === 'cancelled' ? 'error' : 'warning'}
+                            variant="filled"
+                            size="small"
+                            style={{ textTransform: 'capitalize', marginTop: '2px' }}
+                          />
+                        </Grid>
+                      )}
+                      {invoice.order_details.delivery_address && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Delivery Address</Typography>
+                          <Typography variant="body1">{invoice.order_details.delivery_address}</Typography>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Box>
+                  <Divider sx={{ my: 2 }} />
+                </>
+              )}
 
-              <Divider sx={{ my: 2 }} />
+              {/* Items Table (pharmacy/lab orders) */}
+              {invoice.items && invoice.items.length > 0 && (
+                <>
+                  <Box>
+                    <Typography fontWeight={600} mb={1}>Items</Typography>
+                    <Box sx={{ border: '1px solid #e5e7eb', borderRadius: 1, overflow: 'hidden' }}>
+                      <Box sx={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', bgcolor: '#f9fafb', px: 2, py: 1 }}>
+                        <Typography variant="body2" fontWeight={600}>Name</Typography>
+                        <Typography variant="body2" fontWeight={600} textAlign="center">Qty</Typography>
+                        <Typography variant="body2" fontWeight={600} textAlign="right">Price</Typography>
+                        <Typography variant="body2" fontWeight={600} textAlign="right">Total</Typography>
+                      </Box>
+                      {invoice.items.map((item: any, idx: number) => (
+                        <Box key={idx} sx={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', px: 2, py: 0.75, borderTop: '1px solid #f0f0f0' }}>
+                          <Typography variant="body2">{item.name}{item.dosage ? ` (${item.dosage})` : ''}</Typography>
+                          <Typography variant="body2" textAlign="center">{item.qty}</Typography>
+                          <Typography variant="body2" textAlign="right">₹{item.price}</Typography>
+                          <Typography variant="body2" textAlign="right">₹{item.total}</Typography>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                  <Divider sx={{ my: 2 }} />
+                </>
+              )}
 
-              {/* Plan Details */}
-              <Box>
-                <Typography fontWeight={600} >Plan Details</Typography>
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 12 }}>
-                    <Typography variant="body2" color="text.secondary">Plan Name</Typography>
-                    <Typography variant="body1" fontWeight={500}>{invoice.plan_details?.plan_name}</Typography>
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography variant="body2" color="text.secondary">Price</Typography>
-                    <Typography variant="body1">₹{invoice.plan_details?.price}</Typography>
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography variant="body2" color="text.secondary">Validity</Typography>
-                    <Typography variant="body2">
-                      {invoice.plan_details?.validity?.start_date && formatDate(invoice.plan_details.validity.start_date)}
-                      {' to '}
-                      {invoice.plan_details?.validity?.end_date && formatDate(invoice.plan_details.validity.end_date)}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Box>
+              {/* Billing To (subscription invoices) */}
+              {invoice.billing_to && (
+                <>
+                  <Box>
+                    <Typography fontWeight={600}>Billing To</Typography>
+                    <Grid container spacing={2}>
+                      {invoice.billing_to.name && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Name</Typography>
+                          <Typography variant="body1">{invoice.billing_to.name}</Typography>
+                        </Grid>
+                      )}
+                      {invoice.billing_to.provider && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Provider</Typography>
+                          <Typography variant="body1">{invoice.billing_to.provider}</Typography>
+                        </Grid>
+                      )}
+                      <Grid size={{ xs: 6 }}>
+                        <Typography variant="body2" color="text.secondary">User ID</Typography>
+                        <Typography variant="body1">{invoice.billing_to.user_id}</Typography>
+                      </Grid>
+                      <Grid size={{ xs: 6 }}>
+                        <Typography variant="body2" color="text.secondary">User Type</Typography>
+                        <Typography variant="body1">{invoice.billing_to.user_type}</Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                  <Divider sx={{ my: 2 }} />
+                </>
+              )}
 
-              <Divider sx={{ my: 2 }} />
+              {/* Plan Details (subscription invoices) */}
+              {invoice.plan_details && (
+                <>
+                  <Box>
+                    <Typography fontWeight={600}>Plan Details</Typography>
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 12 }}>
+                        <Typography variant="body2" color="text.secondary">Plan Name</Typography>
+                        <Typography variant="body1" fontWeight={500}>
+                          {invoice.plan_details.plan_name}
+                          {invoice.plan_details.plan_type ? ` (${invoice.plan_details.plan_type})` : ''}
+                        </Typography>
+                      </Grid>
+                      <Grid size={{ xs: 6 }}>
+                        <Typography variant="body2" color="text.secondary">Price</Typography>
+                        <Typography variant="body1">₹{invoice.plan_details.price}</Typography>
+                      </Grid>
+                      {invoice.plan_details.validity?.start_date && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Validity</Typography>
+                          <Typography variant="body2">
+                            {formatDate(invoice.plan_details.validity.start_date)}
+                            {' to '}
+                            {invoice.plan_details.validity?.end_date && formatDate(invoice.plan_details.validity.end_date)}
+                          </Typography>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Box>
+                  <Divider sx={{ my: 2 }} />
+                </>
+              )}
 
-              {/* Usage */}
-              <Box>
-                <Typography fontWeight={600} >Usage</Typography>
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography variant="body2" color="text.secondary">Orders Used</Typography>
-                    <Typography variant="body1">{invoice.usage?.orders_used}</Typography>
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography variant="body2" color="text.secondary">Max Orders Allowed</Typography>
-                    <Typography variant="body1">{invoice.usage?.max_orders_allowed}</Typography>
-                  </Grid>
-                </Grid>
-              </Box>
+              {/* Usage (subscription invoices) */}
+              {invoice.usage && (
+                <>
+                  <Box>
+                    <Typography fontWeight={600}>Usage</Typography>
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 6 }}>
+                        <Typography variant="body2" color="text.secondary">Orders Used</Typography>
+                        <Typography variant="body1">{invoice.usage.orders_used}</Typography>
+                      </Grid>
+                      <Grid size={{ xs: 6 }}>
+                        <Typography variant="body2" color="text.secondary">Max Orders Allowed</Typography>
+                        <Typography variant="body1">{invoice.usage.max_orders_allowed === -1 ? 'Unlimited' : invoice.usage.max_orders_allowed}</Typography>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                  <Divider sx={{ my: 2 }} />
+                </>
+              )}
 
-              <Divider sx={{ my: 2 }} />
-
-              {/* Payment Status */}
-              <Box>
-                <Typography fontWeight={600}>Payment</Typography>
-                <Grid container spacing={2}>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography variant="body2" color="text.secondary">Status</Typography>
-                    <CustomChip
-                      label={invoice.payment?.status}
-                      color={invoice.payment?.status === 'paid' ? 'success' : 'warning'}
-                      variant="filled"
-                      size="small"
-                      style={{ textTransform: 'capitalize', marginTop: '2px' }}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 6 }}>
-                    <Typography variant="body2" color="text.secondary">Auto Renew</Typography>
-                    <Typography variant="body1">
-                      {invoice.payment?.auto_renew ? 'Yes' : 'No'}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Box>
-
-              <Divider sx={{ my: 2 }} />
+              {/* Payment */}
+              {invoice.payment && (
+                <>
+                  <Box>
+                    <Typography fontWeight={600}>Payment</Typography>
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 6 }}>
+                        <Typography variant="body2" color="text.secondary">Status</Typography>
+                        <CustomChip
+                          label={invoice.payment.payment_status || invoice.payment.status}
+                          color={
+                            (invoice.payment.payment_status || invoice.payment.status) === 'paid' ? 'success'
+                            : (invoice.payment.payment_status || invoice.payment.status) === 'refunded' ? 'error'
+                            : 'warning'
+                          }
+                          variant="filled"
+                          size="small"
+                          style={{ textTransform: 'capitalize', marginTop: '2px' }}
+                        />
+                      </Grid>
+                      {invoice.payment.razorpay_order_id && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Razorpay Order ID</Typography>
+                          <Typography variant="body1" sx={{ wordBreak: 'break-all' }}>{invoice.payment.razorpay_order_id}</Typography>
+                        </Grid>
+                      )}
+                      {(invoice.payment.payment_id || invoice.payment.razorpay_payment_id) && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Payment ID</Typography>
+                          <Typography variant="body1" sx={{ wordBreak: 'break-all' }}>{invoice.payment.payment_id || invoice.payment.razorpay_payment_id}</Typography>
+                        </Grid>
+                      )}
+                      {invoice.payment.auto_renew !== undefined && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Auto Renew</Typography>
+                          <Typography variant="body1">{invoice.payment.auto_renew ? 'Yes' : 'No'}</Typography>
+                        </Grid>
+                      )}
+                      {invoice.payment.coupon_applied && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Coupon Applied</Typography>
+                          <Typography variant="body1">{invoice.payment.coupon_applied}</Typography>
+                        </Grid>
+                      )}
+                      {invoice.payment.transaction_date && (
+                        <Grid size={{ xs: 6 }}>
+                          <Typography variant="body2" color="text.secondary">Transaction Date</Typography>
+                          <Typography variant="body1">{formatDate(invoice.payment.transaction_date)}</Typography>
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Box>
+                  <Divider sx={{ my: 2 }} />
+                </>
+              )}
 
               {/* Summary */}
-              <Box sx={{ bgcolor: '#f5f5f5', p: 2, borderRadius: 1 }}>
-                <Typography fontWeight={600}>Summary</Typography>
-                <Box display="flex" justifyContent="space-between" mb={1}>
-                  <Typography variant="body2">Subtotal</Typography>
-                  <Typography variant="body2">₹{invoice.summary?.subtotal}</Typography>
+              {invoice.summary && (
+                <Box sx={{ bgcolor: '#f5f5f5', p: 2, borderRadius: 1 }}>
+                  <Typography fontWeight={600}>Summary</Typography>
+                  {(invoice.summary.subtotal !== undefined || invoice.summary.base_price !== undefined) && (
+                    <Box display="flex" justifyContent="space-between" mb={1}>
+                      <Typography variant="body2">{invoice.summary.base_price !== undefined ? 'Base Price' : 'Subtotal'}</Typography>
+                      <Typography variant="body2">₹{invoice.summary.subtotal ?? invoice.summary.base_price}</Typography>
+                    </Box>
+                  )}
+                  {(invoice.summary.gst_amount !== undefined || invoice.summary.tax !== undefined) && (
+                    <Box display="flex" justifyContent="space-between" mb={1}>
+                      <Typography variant="body2">{invoice.summary.gst_amount !== undefined ? 'GST' : 'Tax'}</Typography>
+                      <Typography variant="body2">₹{invoice.summary.gst_amount ?? invoice.summary.tax}</Typography>
+                    </Box>
+                  )}
+                  <Divider sx={{ my: 1 }} />
+                  <Box display="flex" justifyContent="space-between">
+                    <Typography variant="body1" fontWeight={600}>Total Amount</Typography>
+                    <Typography variant="body1" fontWeight={600}>₹{invoice.summary.total_amount}</Typography>
+                  </Box>
                 </Box>
-                <Box display="flex" justifyContent="space-between" mb={1}>
-                  <Typography variant="body2">Tax</Typography>
-                  <Typography variant="body2">₹{invoice.summary?.tax}</Typography>
-                </Box>
-                <Divider sx={{ my: 1 }} />
-                <Box display="flex" justifyContent="space-between">
-                  <Typography variant="body1" fontWeight={600}>Total Amount</Typography>
-                  <Typography variant="body1" fontWeight={600}>₹{invoice.summary?.total_amount}</Typography>
-                </Box>
-              </Box>
+              )}
             </Box>
           )}
 

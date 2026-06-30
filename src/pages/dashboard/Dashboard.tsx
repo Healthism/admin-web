@@ -49,11 +49,16 @@ const Dashboard: React.FC = () => {
 
           {/* Overview Cards */}
           {(() => {
+            const formatChange = (val: number | undefined) => {
+              if (val === undefined || val === null) return '';
+              const sign = val >= 0 ? '+' : '';
+              return `${sign}${val}% from last month`;
+            };
             const overviewData = [
-              { title: 'Total Users', value: overview.total_users || '', subtitle: '+12% from last month', icon: <FaUsers /> },
-              { title: 'Transactions', value: overview.transactions || '', subtitle: '+8% from last month', icon: <FaCreditCard /> },
-              { title: 'Active Promo Codes', value: overview.active_promo_codes || '', subtitle: '3 expiring soon', icon: <FaTags /> },
-              { title: 'Revenue', value: `₹${overview.revenue || ''}`, subtitle: '+15% from last month', icon: <FaRupeeSign /> },
+              { title: 'Total Users', value: overview.total_users ?? '', subtitle: formatChange(overview.total_users_change), icon: <FaUsers /> },
+              { title: 'Transactions', value: overview.transactions ?? '', subtitle: formatChange(overview.transactions_change), icon: <FaCreditCard /> },
+              { title: 'Active Promo Codes', value: overview.active_promo_codes ?? '', subtitle: overview.expiring_soon ? `${overview.expiring_soon} expiring soon` : 'None expiring soon', icon: <FaTags /> },
+              { title: 'Revenue', value: `₹${overview.revenue?.toLocaleString() || '0'}`, subtitle: formatChange(overview.revenue_change), icon: <FaRupeeSign /> },
             ];
             return <OverviewCards data={overviewData} />;
           })()}

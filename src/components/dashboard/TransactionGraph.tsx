@@ -85,6 +85,10 @@ const TransactionGraph = () => {
 
       // Create new chart
       if (ctx) {
+        const barCount = currentChartData.labels.length;
+        const barThickness = barCount > 15 ? undefined : 40;
+        const maxBarThickness = barCount > 15 ? 20 : 40;
+
         chartInstance.current = new Chart(ctx, {
           type: 'bar',
           data: {
@@ -94,7 +98,8 @@ const TransactionGraph = () => {
               data: currentChartData.data,
               backgroundColor: currentChartData.backgroundColor,
               borderRadius: 4,
-              barThickness: 40,
+              ...(barThickness ? { barThickness } : {}),
+              maxBarThickness,
             }]
           },
           options: {
@@ -137,9 +142,12 @@ const TransactionGraph = () => {
               },
               x: {
                 ticks: {
+                  autoSkip: false,
                   font: {
-                    size: 12
-                  }
+                    size: barCount > 15 ? 10 : 12
+                  },
+                  maxRotation: barCount > 15 ? 45 : 0,
+                  minRotation: barCount > 15 ? 45 : 0,
                 },
                 grid: {
                   display: false

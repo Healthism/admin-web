@@ -25,7 +25,7 @@ export const API_ENDPOINTS = {
   USERS:{
     GET_USERS: 'admin/users',
     EXPORT_USERS: 'admin/export-users',
-    SUSPEND_USERS: 'subscription',
+    TOGGLE_STATUS: 'admin/user/toggle-status',
   },
   TRANSACTIONS:{
     GET_TRANSACTIONS: 'admin/payment-history',
@@ -39,6 +39,12 @@ export const API_ENDPOINTS = {
     GET_PROMO_CODE_BY_ID: 'admin/promo',
     DELETE_PROMO_CODE: 'admin/delete',
     UPDATE_PROMO_CODE: 'admin/update',
+  },
+  FEEDBACK:{
+    GET_FEEDBACK: 'admin/feedback',
+    GET_WAITLIST: 'admin/waitlist',
+    EXPORT_FEEDBACK: 'admin/feedback/export-excel',
+    EXPORT_WAITLIST: 'admin/waitlist/export-excel',
   },
 };
 export const apiRequest = async (endpoint: string, options: any = {}) => {
