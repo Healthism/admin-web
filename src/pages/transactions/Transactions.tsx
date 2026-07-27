@@ -218,7 +218,20 @@ const Transactions: React.FC = () => {
                 onChange={e => setSearch(e.target.value)}
                 sx={{ px: 2, py: 0.5, bgcolor: '#fff', borderRadius: 2, fontSize: 15, border: '1px solid #e5e7eb', width: 470 }}
               />
-              <Button variant='contained' color="primary" onClick={handleExport} sx={{ ml: 2 , mr:1}}>Export</Button>
+              <Button
+                variant='contained'
+                onClick={handleExport}
+                sx={{
+                  ml: 2,
+                  mr: 1,
+                  bgcolor: '#00a6bb',
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  '&:hover': { bgcolor: '#008a9a' },
+                }}
+              >
+                Export
+              </Button>
             </Box>
           </Box>
 

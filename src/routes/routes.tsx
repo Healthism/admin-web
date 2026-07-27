@@ -6,6 +6,8 @@ import PromoCodes from '../pages/promo-codes/PromoCodes';
 import Login from '../pages/login/Login';
 import FullProfile from '../pages/fullProfile/FullProfile';
 import FeedbackAndWaitlist from '../pages/feedback/FeedbackAndWaitlist';
+import PayoutManagement from '../pages/payout-management/PayoutManagement';
+import SubscriptionPlans from '../pages/subscription-plans/SubscriptionPlans';
 import ProtectedRoute from './ProtectedRoute'
 
 export interface AppRoute {
@@ -36,6 +38,14 @@ export const routes: AppRoute[] = [
   {
     path: '/feedback',
     element: <ProtectedRoute><FeedbackAndWaitlist /></ProtectedRoute>,
+  },
+  {
+    path: '/payout-management',
+    element: <ProtectedRoute><PayoutManagement /></ProtectedRoute>,
+  },
+  {
+    path: '/subscription-plans',
+    element: <ProtectedRoute><SubscriptionPlans /></ProtectedRoute>,
   }, {
     path: '/profile',
     element: <ProtectedRoute><FullProfile /></ProtectedRoute>,

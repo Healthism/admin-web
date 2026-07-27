@@ -19,15 +19,15 @@ interface TopBarProps {
   notifications?: Notification[];
 }
 
-const TopBar: React.FC<TopBarProps> = ({ 
+const TopBar: React.FC<TopBarProps> = ({
   title,
   subtitle = "Here's what's scheduled for today.",
 }) => {
   const navigate = useNavigate();
 
 
-  const displayTitle = title  
-  
+  const displayTitle = title
+
 
   const handleProfileClick = () => {
     navigate('/profile');
@@ -35,11 +35,11 @@ const TopBar: React.FC<TopBarProps> = ({
 
   return (
     <>
-      <AppBar 
-        position="fixed" 
+      <AppBar
+        position="fixed"
         elevation={0}
-        sx={{ 
-          bgcolor: 'white', 
+        sx={{
+          bgcolor: 'white',
           padding: 0,
           margin: 0,
           borderBottom: '1px solid #e5e7eb',
@@ -48,7 +48,7 @@ const TopBar: React.FC<TopBarProps> = ({
           top: 0,
           left: '240px',
           right: 0,
-          zIndex: 1300,
+          zIndex: (theme) => theme.zIndex.drawer - 1,
           width: 'calc(100% - 240px)',
         }}
       >

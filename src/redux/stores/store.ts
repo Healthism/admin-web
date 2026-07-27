@@ -11,6 +11,8 @@ import notificationMiddleware from '../middleware/notificationMiddleware';
 import dashboardReducer from '../slices/dahboardSlice';
 import profileReducer from '../slices/profileSlice';
 import feedbackReducer from '../slices/feedbackSlice';
+import payoutsReducer from '../slices/payoutsSlice';
+import plansReducer from '../slices/plansSlice';
 
 // Create and configure store
 const sagaMiddleware = createSagaMiddleware();
@@ -25,6 +27,8 @@ const store = configureStore({
     dashboard: dashboardReducer,
     profile: profileReducer,
     feedback: feedbackReducer,
+    payouts: payoutsReducer,
+    plans: plansReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

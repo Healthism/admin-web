@@ -99,26 +99,31 @@ interface CustomTableProps {
   emptyText?: string;
   defaultRowsPerPage?: number;
   rowsPerPageOptions?: (number | { label: string; value: number })[];
+  responsive?: boolean;
 }
 
-const HTable: React.FC<CustomTableProps> = ({ 
-  columns, 
-  rows, 
-  rowKey = 'id', 
+const HTable: React.FC<CustomTableProps> = ({
+  columns,
+  rows,
+  rowKey = 'id',
   emptyText = 'No data',
   defaultRowsPerPage = 5,
-  rowsPerPageOptions = [5, 10, 25, { label: 'All', value: -1 }]
+  rowsPerPageOptions = [5, 10, 25, { label: 'All', value: -1 }],
+  responsive = false,
 }) => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(defaultRowsPerPage);
 
-  // Reset page when rows change or when page is out of bounds
+  // Clamp page synchronously so a shrinking result set (e.g. after a search)
+  // never slices past the end and renders an empty table.
+  const maxPage = rowsPerPage > 0 ? Math.max(0, Math.ceil(rows.length / rowsPerPage) - 1) : 0;
+  const currentPage = Math.min(page, maxPage);
+
   React.useEffect(() => {
-    const maxPage = Math.max(0, Math.ceil(rows.length / rowsPerPage) - 1);
-    if (page > maxPage) {
-      setPage(maxPage);
+    if (page !== currentPage) {
+      setPage(currentPage);
     }
-  }, [rows.length, rowsPerPage, page]);
+  }, [currentPage, page]);
 
   const handleChangePage = (
     _event: React.MouseEvent<HTMLButtonElement> | null,
@@ -136,7 +141,7 @@ const HTable: React.FC<CustomTableProps> = ({
 
   // Calculate the rows to display
   const displayRows = rowsPerPage > 0
-    ? rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+    ? rows.slice(currentPage * rowsPerPage, currentPage * rowsPerPage + rowsPerPage)
     : rows;
 
   // Show pagination only if rows are more than 5
@@ -151,7 +156,7 @@ const HTable: React.FC<CustomTableProps> = ({
         border: '1px solid #f3f3f3' 
       }}
     >
-      <Table sx={{ minWidth: 500 }}>
+      <Table sx={responsive ? { width: '100%', tableLayout: 'auto' } : { minWidth: 500 }}>
         <TableHead>
           <TableRow>
             {columns.map((column) => (
@@ -170,7 +175,7 @@ const HTable: React.FC<CustomTableProps> = ({
             ))}
           </TableRow>
         </TableHead>
-        <TableBody>
+        <TableBody key={`${rows.length}-${currentPage}-${rowsPerPage}`}>
           {rows.length === 0 ? (
             <TableRow>
               <TableCell colSpan={columns.length} align="center">
@@ -179,7 +184,7 @@ const HTable: React.FC<CustomTableProps> = ({
             </TableRow>
           ) : (
             displayRows.map((row, idx) => {
-              const rowIndex = page * rowsPerPage + idx;
+              const rowIndex = currentPage * rowsPerPage + idx;
               return (
                 <TableRow key={row[rowKey] || rowIndex} hover>
                   {columns.map((column) => (
@@ -200,7 +205,7 @@ const HTable: React.FC<CustomTableProps> = ({
                 colSpan={columns.length}
                 count={rows.length}
                 rowsPerPage={rowsPerPage}
-                page={page}
+                page={currentPage}
                 slotProps={{
                   select: {
                     inputProps: {

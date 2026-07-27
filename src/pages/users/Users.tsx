@@ -190,7 +190,18 @@ const Users: React.FC = () => {
             </Tabs>
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
               <Box>
-                <Button variant='contained' color="primary" onClick={handleExport} >Export</Button>
+                <Button
+                  variant='contained'
+                  onClick={handleExport}
+                  sx={{
+                    bgcolor: '#00a6bb',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    '&:hover': { bgcolor: '#008a9a' },
+                  }}
+                >
+                  Export
+                </Button>
               </Box>
               <InputBase
                 placeholder="Search users..."

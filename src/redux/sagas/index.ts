@@ -8,6 +8,8 @@ import promoCodesSaga from './promoCodes/promoCodesSaga';
 import dashboardSaga from './dashboard/dashboardSaga';
 import profileSaga from './profile/profileSaga';
 import feedbackSaga from './feedback/feedbackSaga';
+import payoutsSaga from './payouts/payoutsSaga';
+import plansSaga from './plans/plansSaga';
 
 // Export default function rootSaga
 export default function* rootSaga() {
@@ -19,6 +21,8 @@ export default function* rootSaga() {
   yield spawn(dashboardSaga);
   yield spawn(profileSaga);
   yield spawn(feedbackSaga);
+  yield spawn(payoutsSaga);
+  yield spawn(plansSaga);
 }
 
 // Export enum SagaActions
@@ -53,6 +57,16 @@ export enum SagaActions {
   WAITLIST = 'WAITLIST',
   EXPORT_FEEDBACK = 'EXPORT_FEEDBACK',
   EXPORT_WAITLIST = 'EXPORT_WAITLIST',
+  PAYOUTS = 'PAYOUTS',
+  PAYOUTS_SUMMARY = 'PAYOUTS_SUMMARY',
+  RAZORPAY_SETTLEMENTS = 'RAZORPAY_SETTLEMENTS',
+  PAY_PAYOUT = 'PAY_PAYOUT',
+  PAYOUT_STATUS = 'PAYOUT_STATUS',
+  EXPORT_PAYOUTS = 'EXPORT_PAYOUTS',
+  EXPORT_RAZORPAY_SETTLEMENTS = 'EXPORT_RAZORPAY_SETTLEMENTS',
+  PLANS = 'PLANS',
+  PLAN = 'PLAN',
+  PLAN_ANALYTICS = 'PLAN_ANALYTICS',
 }
 
 // Export enum SagaActionType

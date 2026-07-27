@@ -46,6 +46,22 @@ export const API_ENDPOINTS = {
     EXPORT_FEEDBACK: 'admin/feedback/export-excel',
     EXPORT_WAITLIST: 'admin/waitlist/export-excel',
   },
+  PLANS:{
+    GET_PLANS: 'plans/all',
+    CREATE_PLAN: 'plans',
+    UPDATE_PLAN: 'plans',
+    DELETE_PLAN: 'plans',
+    GET_PLAN_ANALYTICS: 'plans/analytics',
+  },
+  PAYOUTS:{
+    GET_PAYOUTS: 'admin/payouts',
+    GET_SUMMARY: 'admin/payouts/summary',
+    GET_RAZORPAY_SETTLEMENTS: 'admin/payouts/razorpay-settlements',
+    PAY_PAYOUT: 'admin/payouts',
+    UPDATE_STATUS: 'admin/payouts',
+    EXPORT: 'admin/payouts/export',
+    EXPORT_RAZORPAY_SETTLEMENTS: 'admin/payouts/razorpay-settlements/export',
+  },
 };
 export const apiRequest = async (endpoint: string, options: any = {}) => {
   const requestId = Math.random().toString(36).substring(2, 6);

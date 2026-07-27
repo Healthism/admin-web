@@ -15,6 +15,8 @@ import {
   CreditCardOutlined as CreditCardIcon,
   LocalOfferOutlined as LocalOfferIcon,
   RateReviewOutlined as FeedbackIcon,
+  AccountBalanceWalletOutlined as PayoutIcon,
+  WorkspacePremiumOutlined as SubscriptionIcon,
   LogoutOutlined as LogoutIcon
 } from '@mui/icons-material';
 import Logo from '../../assets/logo/color-Logo.webp';
@@ -38,6 +40,8 @@ const Sidebar: React.FC = () => {
     { text: 'Users', icon: <PersonIcon />, route: '/users' },
     { text: 'Transactions', icon: <CreditCardIcon />, route: '/transactions' },
     { text: 'Promo Codes', icon: <LocalOfferIcon />, route: '/promo-codes' },
+    { text: 'Subscription Plans', icon: <SubscriptionIcon />, route: '/subscription-plans' },
+    { text: 'Payout Management', icon: <PayoutIcon />, route: '/payout-management' },
   ];
 
   // Final items to render
@@ -70,8 +74,12 @@ const Sidebar: React.FC = () => {
       return currentPath === '/promo-codes';
     } else if (route === '/feedback') {
       return currentPath === '/feedback';
+    } else if (route === '/payout-management') {
+      return currentPath === '/payout-management';
+    } else if (route === '/subscription-plans') {
+      return currentPath === '/subscription-plans';
     }
-    
+
 
     return currentPath === route;
   };
